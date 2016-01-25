@@ -2,3 +2,5 @@
 *.deps
 x64/Debug/CudaTV_test.tlog/CudaTV_test.lastbuildstate
 *.tlog
+*.tiff
+*.idb

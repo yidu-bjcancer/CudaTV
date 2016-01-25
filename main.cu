@@ -11,9 +11,9 @@
 #include "referenceChambolle.h"
 #include "chambolleTV.h"
 #include "laplacian.h"
-// #include "primaldualTV.h"
+#include "primaldualTV.h"
 
-
+void TiffOutput(float *buffer, int Height, int Width, int PageNO);
 
 void listmethods() {
 	printf("    1  reference implementation grad div laplacian\n");
@@ -55,6 +55,9 @@ int main(int argc, char ** argv)
 	lambda = atof(argv[1]);
 	u = read_pgm_fimage(argv[2]);
 	nx = u->ncol; ny = u->nrow;
+
+	TiffOutput(u->gray, 256, 256, 1);
+
 
 	/* run Method */
 	float *input = u->gray;
@@ -109,19 +112,37 @@ int main(int argc, char ** argv)
 	}
 	else if (method == 13){
 		printf("cuda TV primal dual\n");
-//		cudaTVpd(input, iter, nx, ny, lambda);
+		cudaTVpd(input, iter, nx, ny, lambda);
 	}
 	else if (method == 14){
 		printf("cuda TV primal dual with structure of arrays\n");
-//		cudaTVpd_SoA(input, iter, nx, ny, lambda);
+		cudaTVpd_SoA(input, iter, nx, ny, lambda);
 	}
 	else {
 		printf("cuda TV primal dual : PDHG (zhu-chan) with structure of arrays (FASTEST)\n");
-//		cudaTVpdhg_SoA(input, iter, nx, ny, lambda);
+		cudaTVpdhg_SoA(input, iter, nx, ny, lambda);
 	}
 
+	TiffOutput(u->gray, 256, 256, 1);
+
 	/* extract output */
-	for (i = 0; i < nx*ny; i++) { u->gray[i] = (int)u->gray[i]; }
+	for (i = 0; i < nx*ny; i++) 
+	{ 
+		u->gray[i] = (int)u->gray[i]; 
+	}
+
+	/*
+	for (int ii = 0; ii < ny; ii++)
+	{
+		for (int jj = 0; jj < nx; jj++)
+		{
+			std::cout << u->gray[ii * nx + jj] << "   ";
+		}
+		std::cout << std::endl;
+	}
+	*/
+
+
 	write_pgm_fimage(u, argv[3]);
 
 	del_fimage(u);

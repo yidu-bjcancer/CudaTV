@@ -7,6 +7,7 @@
 /*--------------------------------------------------------------------------*/
 
 #include "fimage.h"
+#include <iostream>
 
 int verbose = 0;
 
@@ -28,6 +29,9 @@ static void skip_what_should_be_skipped(FILE * f)
 	} while (c == '#');
 	ungetc(c, f);
 }
+
+void TiffOutput(float *buffer, int Height, int Width, int PageNO);
+
 
 /*--------------------------------------------------------------------------*/
 /* Decimal read*/
@@ -60,6 +64,7 @@ static Fimage read_pgm_fimage_stream(FILE *f)
 	if (f == NULL) fprintf(stderr, "can't read input file.");
 
 	/* read headder */
+/*
 	if (getc(f) != 'P') fprintf(stderr, "Not a PGM file!");
 	if ((c = getc(f)) == '2') bin = FALSE;
 	else if (c == '5') bin = TRUE;
@@ -70,22 +75,59 @@ static Fimage read_pgm_fimage_stream(FILE *f)
 	fscanf(f, "%d", &ysize);
 	skip_what_should_be_skipped(f);
 	fscanf(f, "%d", &depth);
+*/
 
+	xsize = 256;
+	ysize = 256;
+	fseek(f, 28, 0);
+	std::cout<<ftell(f);
 	/* get memory */
 	image = new_fimage2(xsize, ysize);
 	image->ncol = xsize;
 	image->nrow = ysize;
 
 	/* read data */
-	skip_what_should_be_skipped(f);
+//	skip_what_should_be_skipped(f);
+
 	for (y = 0; y < ysize; y++)
+	{
 		for (x = 0; x < xsize; x++)
-			image->gray[x + y * xsize] = (float)(bin ? getc(f) : get_num(f));
+		{
+			//image->gray[x + y * xsize] = (float)(bin ? getc(f) : get_num(f));
+
+			//std::cout << getc(f) << "    ";
+			
+			float tmp = (float)(getc(f));
+			image->gray[x + y * xsize] = tmp;
+			
+		}
+		std::cout << std::endl;
+	}
+
+	fseek(f, 28, 0);
+
+	unsigned char Img[256 * 256] = { 0 };
+
+	fread(Img, 256 * 256, 1, f);
+
+	float fImg[256 * 256] = { 0 };
+
+	for (int ii = 0; ii < 256 * 256;ii++)
+	{
+		fImg[ii] = (float)(Img[ii]);
+	}
+
+	for (int ii = 0; ii < 256 * 256; ii++)
+	{
+		image->gray[ii] = fImg[ii];
+	}
 
 	if (verbose) fprintf(stderr, "input image: xsize %d ysize %d depth %d\n",
 		image->ncol, image->nrow, depth);
 
 	/* close file */
+
+	//TiffOutput(fImg, 256, 256, 1);
 
 	return image;
 }
