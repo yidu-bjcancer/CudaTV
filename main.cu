@@ -56,7 +56,7 @@ int main(int argc, char ** argv)
 	u = read_pgm_fimage(argv[2]);
 	nx = u->ncol; ny = u->nrow;
 
-	TiffOutput(u->gray, 256, 256, 1);
+	//TiffOutput(u->gray, 256, 256, 1);
 
 
 	/* run Method */
@@ -131,6 +131,7 @@ int main(int argc, char ** argv)
 		u->gray[i] = (int)u->gray[i]; 
 	}
 
+
 	/*
 	for (int ii = 0; ii < ny; ii++)
 	{
@@ -142,7 +143,7 @@ int main(int argc, char ** argv)
 	}
 	*/
 
-
+	TiffOutput(u->gray, 256, 256, 1);
 	write_pgm_fimage(u, argv[3]);
 
 	del_fimage(u);
